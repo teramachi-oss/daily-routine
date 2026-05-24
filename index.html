@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毎日の習慣 — お腹と姿勢</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&display=swap');
+
+  :root {
+    --ink: #1a1714;
+    --paper: #f4ede0;
+    --paper-deep: #e8ddc9;
+    --clay: #c4502a;
+    --clay-deep: #a13d1d;
+    --moss: #4a5d3a;
+    --gold: #d99a32;
+    --teal: #2f6b6b;
+    --line: #d8cbb2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 15% 12%, rgba(196,80,42,0.06), transparent 38%),
+      radial-gradient(circle at 85% 88%, rgba(74,93,58,0.07), transparent 42%);
+    color:var(--ink); min-height:100vh; padding:28px 18px 80px; max-width:560px; margin:0 auto;
+  }
+  .topbar { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:6px; }
+  .kicker { font-family:'Bricolage Grotesque',sans-serif; font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:var(--clay-deep); font-weight:800; }
+  h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:30px; line-height:1.05; margin:6px 0 2px; letter-spacing:-0.01em; }
+  .sub { font-size:13px; color:#7a6f5e; margin-bottom:18px; }
+  .streak { text-align:right; line-height:1; flex-shrink:0; }
+  .streak .num { font-family:'Bricolage Grotesque',sans-serif; font-size:44px; font-weight:800; color:var(--clay); }
+  .streak .lbl { font-size:10px; letter-spacing:0.18em; color:#8a7e6b; text-transform:uppercase; }
+
+  .nudge { padding:11px 15px; border-radius:11px; margin-bottom:16px; font-size:13px; font-weight:500; display:flex; align-items:center; gap:9px; }
+  .nudge.morning { background:rgba(217,154,50,0.16); color:#8a6612; }
+  .nudge.night { background:rgba(47,107,107,0.14); color:#1f5252; }
+  .nudge.idle { background:var(--paper-deep); color:#7a6f5e; }
+  .nudge .next { margin-left:auto; font-size:11px; opacity:0.8; font-weight:700; }
+
+  .weekstrip { display:flex; gap:5px; margin-bottom:20px; }
+  .wd { flex:1; text-align:center; padding:8px 2px; border-radius:9px; background:#fbf6ec; border:1px solid var(--line); font-size:11px; }
+  .wd .d { font-weight:700; color:#8a7e6b; }
+  .wd .icn { font-size:13px; margin-top:2px; line-height:1.1; }
+  .wd.today { background:var(--ink); border-color:var(--ink); }
+  .wd.today .d { color:var(--gold); }
+
+  .progress-wrap { margin:0 0 22px; }
+  .progress-track { height:10px; background:var(--paper-deep); border-radius:20px; overflow:hidden; border:1px solid var(--line); }
+  .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--clay)); border-radius:20px; transition:width 0.5s cubic-bezier(.2,.8,.2,1); }
+  .progress-meta { display:flex; justify-content:space-between; font-size:11px; color:#8a7e6b; margin-top:7px; }
+
+  .block { margin-bottom:22px; }
+  .block-head { display:flex; align-items:baseline; gap:9px; margin-bottom:11px; }
+  .block-head .time { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:18px; }
+  .block-head .min { font-size:12px; color:#8a7e6b; }
+  .block-head .bar { flex:1; height:1px; background:var(--line); }
+  .tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; letter-spacing:0.05em; }
+  .tag.core { background:rgba(196,80,42,0.13); color:var(--clay-deep); }
+  .tag.train { background:rgba(74,93,58,0.15); color:var(--moss); }
+  .tag.stretch { background:rgba(47,107,107,0.13); color:var(--teal); }
+
+  .item { display:flex; align-items:flex-start; gap:13px; background:#fbf6ec; border:1px solid var(--line); border-radius:13px; padding:13px 15px; margin-bottom:8px; cursor:pointer; transition:transform 0.12s,border-color 0.2s,background 0.2s; }
+  .item:active { transform:scale(0.99); }
+  .item.done { background:#eef0e6; border-color:#c5cdb0; }
+  .item.done .name { color:#9a937f; text-decoration:line-through; }
+  .check { width:24px; height:24px; border-radius:8px; flex-shrink:0; border:2px solid var(--line); display:grid; place-items:center; transition:all 0.2s; margin-top:1px; }
+  .item.done .check { background:var(--moss); border-color:var(--moss); }
+  .check svg { width:14px; height:14px; stroke:#fff; stroke-width:3.5; fill:none; opacity:0; transform:scale(0.5); transition:all 0.2s; }
+  .item.done .check svg { opacity:1; transform:scale(1); }
+  .name { font-size:15px; font-weight:500; line-height:1.35; }
+  .detail { font-size:12px; color:#8a7e6b; margin-top:3px; line-height:1.4; }
+
+  /* バッジ */
+  .badges-sec { margin-top:30px; }
+  .badges-sec h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:15px; font-weight:800; letter-spacing:0.04em; margin-bottom:4px; }
+  .badges-sec .note { font-size:11px; color:#8a7e6b; margin-bottom:14px; }
+  .badge-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+  .badge { text-align:center; padding:13px 6px; border-radius:13px; background:#fbf6ec; border:1px solid var(--line); position:relative; transition:all 0.3s; }
+  .badge.locked { opacity:0.4; filter:grayscale(0.7); }
+  .badge.unlocked { background:linear-gradient(160deg,#fffaf0,#f3e6c8); border-color:var(--gold); }
+  .badge .emoji { font-size:24px; line-height:1; }
+  .badge .days { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:13px; margin-top:5px; color:var(--clay-deep); }
+  .badge .cap { font-size:9px; color:#8a7e6b; margin-top:1px; }
+  .badge.next-badge { border:1.5px dashed var(--clay); }
+  .badge.next-badge::after { content:'あと'attr(data-left)'日'; position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:var(--clay); color:#fff; font-size:9px; font-weight:700; padding:1px 7px; border-radius:10px; white-space:nowrap; }
+
+  /* ごほうび */
+  .rewards-sec { margin-top:28px; }
+  .rewards-sec h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:15px; font-weight:800; letter-spacing:0.04em; margin-bottom:4px; }
+  .rewards-sec .note { font-size:11px; color:#8a7e6b; margin-bottom:14px; }
+  .reward-row { display:flex; align-items:center; gap:10px; background:#fbf6ec; border:1px solid var(--line); border-radius:12px; padding:11px 14px; margin-bottom:8px; }
+  .reward-row.achieved { background:linear-gradient(160deg,#f0f3e8,#e3ecd2); border-color:var(--moss); }
+  .reward-row .rdays { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:14px; color:var(--clay); min-width:42px; }
+  .reward-row .rtext { flex:1; font-size:13.5px; }
+  .reward-row .rtext:empty::before { content:'タップして自分へのごほうびを設定…'; color:#b5a98f; }
+  .reward-row.achieved .rtext { font-weight:700; color:var(--moss); }
+  .reward-row .rstat { font-size:16px; }
+  .reward-input { width:100%; border:none; background:transparent; font-family:inherit; font-size:13.5px; color:var(--ink); outline:none; }
+
+  .footer-note { margin-top:28px; padding:16px 18px; border-radius:13px; background:var(--paper-deep); border:1px dashed var(--clay); font-size:12.5px; line-height:1.6; color:#6b5f4d; }
+  .footer-note b { color:var(--clay-deep); }
+  .reset { display:block; margin:22px auto 0; background:none; border:none; color:#a89c87; font-size:12px; text-decoration:underline; cursor:pointer; font-family:inherit; }
+
+  .done-banner { text-align:center; padding:18px; border-radius:13px; background:linear-gradient(135deg,var(--moss),#3a4a2d); color:#f0ead9; font-weight:700; font-size:15px; margin-bottom:22px; display:none; animation:pop 0.4s cubic-bezier(.2,.9,.3,1.4); }
+  .done-banner.show { display:block; }
+  @keyframes pop { from{transform:scale(0.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+  /* 達成モーダル */
+  .modal-bg { position:fixed; inset:0; background:rgba(26,23,20,0.55); display:none; place-items:center; z-index:50; padding:24px; }
+  .modal-bg.show { display:grid; animation:fade 0.3s; }
+  @keyframes fade { from{opacity:0;} to{opacity:1;} }
+  .modal { background:var(--paper); border-radius:20px; padding:32px 26px; text-align:center; max-width:340px; animation:pop 0.45s cubic-bezier(.2,.9,.3,1.4); border:2px solid var(--gold); }
+  .modal .big { font-size:60px; line-height:1; }
+  .modal h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:22px; font-weight:800; margin:12px 0 6px; }
+  .modal p { font-size:13.5px; color:#6b5f4d; line-height:1.6; margin-bottom:20px; }
+  .modal button { background:var(--clay); color:#fff; border:none; padding:12px 28px; border-radius:30px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; }
+  .loading { text-align:center; color:#a89c87; padding:40px; font-size:13px; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <div class="kicker">Daily Routine</div>
+      <h1>お腹と姿勢の<br>毎日習慣</h1>
+    </div>
+    <div class="streak"><div class="num" id="streakNum">0</div><div class="lbl">日連続</div></div>
+  </div>
+  <div class="sub" id="subText">曜日ごとに今日のメニューが出ます</div>
+
+  <div class="nudge idle" id="nudge"><span id="nudgeText">読み込み中…</span><span class="next" id="nudgeNext"></span></div>
+
+  <div class="weekstrip" id="weekstrip"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
+    <div class="progress-meta"><span id="progressText">読み込み中…</span><span id="dateText"></span></div>
+  </div>
+
+  <div class="done-banner" id="banner">🎉 今日の分、完了！連続記録が伸びました</div>
+
+  <div id="app"><div class="loading">読み込み中…</div></div>
+
+  <div class="badges-sec">
+    <h2>🏅 連続バッジ</h2>
+    <div class="note">節目で解放。一度取った勲章はリセットされても消えません。</div>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <div class="rewards-sec">
+    <h2>🎁 自分へのごほうび</h2>
+    <div class="note">節目ごとに、自分へのごほうびを自由に設定。達成すると解放されます。タップして編集。</div>
+    <div id="rewardList"></div>
+  </div>
+
+  <button class="reset" id="resetBtn">今日のチェックをリセット</button>
+
+  <div class="footer-note">
+    <b>通知について：</b>このアプリは閉じている間の自動通知が出せないので、スマホのアラーム/カレンダーで「朝9時=筋トレ」「夜21時=ストレッチ」の繰り返し通知を作るのがおすすめ。アプリ側は、開いた時間に合わせて今やる分をそっと案内します。
+  </div>
+
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <div class="big" id="modalEmoji">🎉</div>
+      <h3 id="modalTitle"></h3>
+      <p id="modalBody"></p>
+      <button id="modalClose">やった！</button>
+    </div>
+  </div>
+
+<script>
+const CORE = { label:'毎日の土台', tag:'core', tagText:'CORE', min:'約4分', items:[
+  { id:'c1', name:'プランク 1分', detail:'お尻を締めお腹を引き込む。腰を反らさない' },
+  { id:'c2', name:'のが腹筋 3分（地獄の3分）', detail:'クランチ〜カーヴィークランチ6種。回数より丁寧に' },
+]};
+const T_SQUAT = { id:'sq', name:'BPMスクワット（体脂肪燃焼）', detail:'心拍を上げる有酸素枠。膝をつま先より前に出しすぎない' };
+const T_PUSH  = { id:'pu', name:'のが腕立て 4種', detail:'胸を開く動き。苦手なら膝つきでOK' };
+const S_LOWBACK = { id:'st_lb', name:'オガトレ 腰痛ストレッチ（12分/8分）', detail:'骨盤〜背骨。腸腰筋・裏ももをゆるめ姿勢を立てる' };
+const S_SHLDR   = { id:'st_sh', name:'オガトレ 巻き肩ストレッチ（9分）', detail:'胸を伸ばし肩を後ろへ。猫背・前肩の根本対策' };
+const S_NIGHT   = { id:'st_ng', name:'オガトレ 夜の全身ストレッチ（9分）', detail:'リラックスして疲労リセット。寝つきUP' };
+
+const WEEK = {
+  1:{icn:'🦵🌿', label:'下半身＋腰痛', train:T_SQUAT, stretch:S_LOWBACK},
+  2:{icn:'💪🫳', label:'上半身＋巻き肩', train:T_PUSH,  stretch:S_SHLDR},
+  3:{icn:'🦵🌙', label:'下半身＋夜ストレッチ', train:T_SQUAT, stretch:S_NIGHT},
+  4:{icn:'💪🫳', label:'上半身＋巻き肩', train:T_PUSH,  stretch:S_SHLDR},
+  5:{icn:'🦵🌿', label:'下半身＋腰痛', train:T_SQUAT, stretch:S_LOWBACK},
+  6:{icn:'💪🫳', label:'上半身＋巻き肩', train:T_PUSH,  stretch:S_SHLDR},
+  0:{icn:'🦵🌙', label:'下半身＋夜ストレッチ', train:T_SQUAT, stretch:S_NIGHT},
+};
+const WD_LABEL = ['日','月','火','水','木','金','土'];
+
+const BADGES = [
+  {d:3,  e:'🌱', c:'芽が出た'},
+  {d:7,  e:'🔥', c:'1週間'},
+  {d:14, e:'⭐', c:'2週間'},
+  {d:21, e:'💎', c:'習慣化'},
+  {d:30, e:'🏆', c:'1ヶ月'},
+  {d:50, e:'👑', c:'50日'},
+  {d:100,e:'🚀', c:'100日'},
+];
+
+const todayKey = () => new Date().toLocaleDateString('sv-SE');
+const dow = () => new Date().getDay();
+let state = { checks:{}, streak:0, maxStreak:0, lastDone:null, checksDate:null, earned:[], rewards:{} };
+
+function todayPlan(){ return WEEK[dow()]; }
+function trainBlock(){ const p=todayPlan(); return {label:'今日の筋トレ',tag:'train',tagText:'TRAIN',min:p.train===T_SQUAT?'有酸素・脂肪燃焼':'おまけ・姿勢にも◯',items:[p.train]}; }
+function stretchBlock(){ const p=todayPlan(); return {label:'今日のストレッチ',tag:'stretch',tagText:'STRETCH',min:'夜・温まってから◎',items:[p.stretch]}; }
+function currentItems(){ return [...CORE.items, ...trainBlock().items, ...stretchBlock().items]; }
+function coreDone(){ return CORE.items.every(it=>state.checks[it.id]); }
+
+async function load(){
+  try { const r=localStorage.getItem('routine-v5'); if(r) state=JSON.parse(r); } catch(e){}
+  if(!state.earned) state.earned=[];
+  if(!state.rewards) state.rewards={};
+  if(state.checksDate!==todayKey()){ state.checks={}; state.checksDate=todayKey(); }
+  render();
+}
+async function save(){ try{ localStorage.setItem('routine-v5', JSON.stringify(state)); }catch(e){ console.error(e); } }
+
+function checkMilestone(){
+  for(const b of BADGES){
+    if(state.streak>=b.d && !state.earned.includes(b.d)){
+      state.earned.push(b.d);
+      const rw = state.rewards[b.d];
+      showModal(b.e, `${b.d}日連続達成！`,
+        rw ? `バッジ「${b.c}」を解放！\nごほうび「${rw}」も解放されました🎁` : `バッジ「${b.c}」を解放しました。\nこの調子！`);
+    }
+  }
+}
+
+function refreshStreak(){
+  const yest = new Date(Date.now()-86400000).toLocaleDateString('sv-SE');
+  if(coreDone() && state.lastDone!==todayKey()){
+    state.streak = (state.lastDone===yest) ? state.streak+1 : 1;
+    state.lastDone = todayKey();
+    state.maxStreak = Math.max(state.maxStreak||0, state.streak);
+    document.getElementById('banner').classList.add('show');
+    checkMilestone();
+  } else if(!coreDone() && state.lastDone===todayKey()){
+    state.lastDone = (state.streak>0)?yest:null;
+    state.streak = Math.max(0, state.streak-1);
+    document.getElementById('banner').classList.remove('show');
+  }
+}
+
+function toggle(id){ state.checks[id]=!state.checks[id]; refreshStreak(); save(); render(); }
+function reset(){
+  currentItems().forEach(it=>delete state.checks[it.id]);
+  if(state.lastDone===todayKey()){ state.lastDone=null; state.streak=Math.max(0,state.streak-1); }
+  document.getElementById('banner').classList.remove('show');
+  save(); render();
+}
+
+function blockHTML(b){
+  return `<div class="block">
+    <div class="block-head"><span class="time">${b.label}</span><span class="tag ${b.tag}">${b.tagText}</span><span class="min">${b.min}</span><span class="bar"></span></div>
+    ${b.items.map(it=>`<div class="item ${state.checks[it.id]?'done':''}" data-id="${it.id}">
+      <div class="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+      <div><div class="name">${it.name}</div><div class="detail">${it.detail}</div></div></div>`).join('')}
+  </div>`;
+}
+
+function renderWeekstrip(){
+  const today=dow();
+  document.getElementById('weekstrip').innerHTML =
+    [1,2,3,4,5,6,0].map(d=>`<div class="wd ${d===today?'today':''}"><div class="d">${WD_LABEL[d]}</div><div class="icn">${WEEK[d].icn}</div></div>`).join('');
+}
+
+function renderNudge(){
+  const h=new Date().getHours();
+  const el=document.getElementById('nudge'), t=document.getElementById('nudgeText'), n=document.getElementById('nudgeNext');
+  el.className='nudge';
+  if(h>=6 && h<14){ el.classList.add('morning'); t.textContent='☀️ 朝の時間。まずは筋トレからいきましょう'; n.textContent='夜21時にストレッチ'; }
+  else if(h>=18 || h<2){ el.classList.add('night'); t.textContent='🌙 夜の時間。ストレッチで1日をリセット'; n.textContent='朝9時に筋トレ'; }
+  else { el.classList.add('idle'); t.textContent='今日のメニュー、まだの分があればどうぞ'; n.textContent='朝9時 / 夜21時'; }
+}
+
+function renderBadges(){
+  const next = BADGES.find(b=>!state.earned.includes(b.d));
+  document.getElementById('badgeGrid').innerHTML = BADGES.map(b=>{
+    const got = state.earned.includes(b.d);
+    const isNext = next && next.d===b.d;
+    const left = isNext ? (b.d-state.streak) : 0;
+    return `<div class="badge ${got?'unlocked':'locked'} ${isNext?'next-badge':''}" ${isNext?`data-left="${left>0?left:1}"`:''}>
+      <div class="emoji">${b.e}</div><div class="days">${b.d}日</div><div class="cap">${b.c}</div></div>`;
+  }).join('');
+}
+
+function renderRewards(){
+  document.getElementById('rewardList').innerHTML = BADGES.map(b=>{
+    const got = state.earned.includes(b.d);
+    const val = state.rewards[b.d] || '';
+    return `<div class="reward-row ${got?'achieved':''}">
+      <div class="rdays">${b.d}日</div>
+      <input class="reward-input rtext" data-day="${b.d}" value="${val.replace(/"/g,'&quot;')}" placeholder="タップして自分へのごほうびを設定…">
+      <div class="rstat">${got?'🎁':'🔒'}</div></div>`;
+  }).join('');
+  document.querySelectorAll('.reward-input').forEach(inp=>{
+    inp.addEventListener('change', e=>{ state.rewards[e.target.dataset.day]=e.target.value.trim(); save(); });
+  });
+}
+
+function showModal(emoji,title,body){
+  document.getElementById('modalEmoji').textContent=emoji;
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').textContent=body;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function render(){
+  renderWeekstrip(); renderNudge();
+  const app=document.getElementById('app');
+  app.innerHTML = blockHTML(CORE)+blockHTML(trainBlock())+blockHTML(stretchBlock());
+  app.querySelectorAll('.item').forEach(el=>el.addEventListener('click',()=>toggle(el.dataset.id)));
+  const items=currentItems();
+  const done=items.filter(it=>state.checks[it.id]).length;
+  document.getElementById('fill').style.width=(done/items.length*100)+'%';
+  document.getElementById('progressText').textContent=`${done} / ${items.length} 完了${coreDone()?'（土台クリア✓）':''}`;
+  document.getElementById('streakNum').textContent=state.streak;
+  document.getElementById('subText').textContent=`今日は${WD_LABEL[dow()]}曜・${todayPlan().label}の日`;
+  document.getElementById('dateText').textContent=new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
+  renderBadges(); renderRewards();
+  if(coreDone()) document.getElementById('banner').classList.add('show');
+}
+
+document.getElementById('resetBtn').addEventListener('click', reset);
+document.getElementById('modalClose').addEventListener('click', ()=>{ document.getElementById('modalBg').classList.remove('show'); render(); });
+load();
+</script>
+</body>
+</html>
