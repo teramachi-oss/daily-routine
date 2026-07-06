@@ -201,9 +201,13 @@ const BADGES = [
 const CIRCUMFERENCE = 2 * Math.PI * 52;
 const MAX_STREAK = 30;
 
+// ── Sheet同期(方式3) ── SYNC_URLにGAS webアプリのデプロイURLを貼る。空文字の間は同期しない(既存動作のまま)
+const SYNC_URL = 'https://script.google.com/macros/s/AKfycbzlP81sAucetKiCergr7hWsIrwZYDHCrMYCEhfgYLChnouGZTiPf_oWKpAiuV5tz7uyOQ/exec';
+const SYNC_TOKEN = '6a1826385c69cca6c782ac437532abf2';
+
 const todayKey = () => new Date().toLocaleDateString('sv-SE');
 const dow = () => new Date().getDay();
-let state = { checks:{}, streak:0, maxStreak:0, lastDone:null, checksDate:null, earned:[] };
+let state = { checks:{}, streak:0, maxStreak:0, lastDone:null, checksDate:null, earned:[], history:[] };
 
 function plan(){ return WEEK[dow()]; }
 function currentItems(){ return [...CORE.items, plan().train, plan().stretch]; }
@@ -212,10 +216,29 @@ function coreDone(){ return CORE.items.every(it=>state.checks[it.id]); }
 async function load(){
   try{ const r=localStorage.getItem('routine-v5'); if(r) state=JSON.parse(r); }catch(e){}
   if(!state.earned) state.earned=[];
+  if(!state.history) state.history=[];
   if(state.checksDate!==todayKey()){ state.checks={}; state.checksDate=todayKey(); }
   render();
 }
-function save(){ try{ localStorage.setItem('routine-v5', JSON.stringify(state)); }catch(e){} }
+function syncToSheet(rec){
+  if(!SYNC_URL) return; // URL未設定の間は何もしない(既存動作を保つ)
+  try{
+    fetch(SYNC_URL, { method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(Object.assign({token:SYNC_TOKEN}, rec)) });
+  }catch(e){}
+}
+function recordHistory(){
+  const key=todayKey();
+  const items=currentItems();
+  const done=items.filter(it=>state.checks[it.id]).map(it=>it.id);
+  const rec={ date:key, weekday:dow(), done, total:items.length, coreDone:coreDone(), streak:state.streak, maxStreak:state.maxStreak||0 };
+  const last=state.history[state.history.length-1];
+  if(last && last.date===key) state.history[state.history.length-1]=rec;
+  else state.history.push(rec);
+  syncToSheet(rec);
+}
+function save(){ try{ recordHistory(); localStorage.setItem('routine-v5', JSON.stringify(state)); }catch(e){} }
 
 function refreshStreak(){
   const yest=new Date(Date.now()-86400000).toLocaleDateString('sv-SE');
