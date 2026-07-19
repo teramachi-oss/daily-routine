@@ -18,9 +18,9 @@
     --border: #1e2a3a;
     --text:   #FFFFFF;
     --sub:    #6B7A99;
-    --blue:   #3B82F6;
+    --blue:   #2563EB;
     --orange: #F97316;
-    --cyan:   #0EA5E9;
+    --cyan:   #0284C7;
     --track:  #1a2235;
   }
 
@@ -45,7 +45,7 @@
 
   .nudge { padding:12px 15px; border-radius:12px; margin-bottom:16px; font-size:13px; font-weight:500; border:1px solid var(--border); }
   .nudge.morning { color:var(--orange); border-color:rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); }
-  .nudge.night   { color:var(--blue);   border-color:rgba(59,130,246,0.3);  background:rgba(59,130,246,0.06); }
+  .nudge.night   { color:var(--blue);   border-color:rgba(37,99,235,0.3);  background:rgba(37,99,235,0.06); }
   .nudge.idle    { color:var(--sub);    border-color:var(--border);          background:var(--card); }
 
   .weekstrip { display:flex; gap:5px; margin-bottom:20px; }
@@ -77,8 +77,8 @@
   .block-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; margin-top:20px; }
   .block-head .lbl { font-size:15px; font-weight:700; }
   .tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; letter-spacing:0.05em; border:1px solid; }
-  .tag.core    { color:var(--blue);   background:rgba(59,130,246,0.1);  border-color:rgba(59,130,246,0.25); }
-  .tag.train   { color:var(--cyan);   background:rgba(14,165,233,0.1);  border-color:rgba(14,165,233,0.25); }
+  .tag.core    { color:var(--blue);   background:rgba(37,99,235,0.1);  border-color:rgba(37,99,235,0.25); }
+  .tag.train   { color:var(--cyan);   background:rgba(2,132,199,0.1);  border-color:rgba(2,132,199,0.25); }
   .tag.stretch { color:var(--orange); background:rgba(249,115,22,0.1);  border-color:rgba(249,115,22,0.25); }
   .block-head .min { font-size:11px; color:var(--sub); }
   .block-head .bar { flex:1; height:1px; background:var(--border); }
@@ -135,7 +135,7 @@
   <div class="ring-wrap">
     <svg class="ring" width="120" height="120" viewBox="0 0 120 120">
       <circle cx="60" cy="60" r="52" stroke="#1a2235" stroke-width="10" fill="none"/>
-      <circle cx="60" cy="60" r="52" stroke="#3B82F6" stroke-width="10" fill="none"
+      <circle cx="60" cy="60" r="52" stroke="#2563EB" stroke-width="10" fill="none"
         stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" id="ringArc"/>
     </svg>
     <div class="ring-center">
@@ -174,7 +174,8 @@
 </div>
 
 <script>
-const CORE = { label:'毎日の土台', tag:'core', tagText:'CORE', min:'約4分', items:[
+const CORE = { label:'毎日の土台', tag:'core', tagText:'CORE', min:'約15分', items:[
+  { id:'walk', name:'ウォーキングマシン 10分', detail:'体重測定からそのまま乗る。少し息が上がる速さで。余裕があれば20分' },
   { id:'c1', name:'プランク 1分', detail:'お尻を締めお腹を引き込む。腰を反らさない' },
   { id:'c2', name:'のが腹筋 3分（地獄の3分）', detail:'クランチ〜カーヴィークランチ6種。回数より丁寧に' },
 ]};
@@ -287,8 +288,8 @@ function render(){
   const h=new Date().getHours();
   const el=document.getElementById('nudge');
   el.className='nudge';
-  if(h>=6&&h<14){el.classList.add('morning');document.getElementById('nudgeText').textContent='朝の時間。まずは筋トレからいきましょう';}
-  else if(h>=18||h<2){el.classList.add('night');document.getElementById('nudgeText').textContent='夜の時間。ストレッチで1日をリセット';}
+  if(h>=6&&h<14){el.classList.add('morning');document.getElementById('nudgeText').textContent='朝スタックの時間。体重計に乗ったらそのままマシンへ';}
+  else if(h>=18||h<2){el.classList.add('night');document.getElementById('nudgeText').textContent='夜はストレッチだけ。体をゆるめて寝つきを整える';}
   else{el.classList.add('idle');document.getElementById('nudgeText').textContent='今日のメニュー、まだの分があればどうぞ';}
 
   const offset=CIRCUMFERENCE*(1-Math.min(1,state.streak/MAX_STREAK));
@@ -298,9 +299,9 @@ function render(){
 
   const app=document.getElementById('app');
   app.innerHTML=
-    blockHTML('毎日の土台','core','CORE','約4分',CORE.items)+
+    blockHTML('朝の土台','core','CORE','約15分',CORE.items)+
     blockHTML('今日の筋トレ','train','TRAIN','有酸素・脂肪燃焼',[p.train])+
-    blockHTML('今日のストレッチ','stretch','STRETCH','夜・温まってから',[p.stretch]);
+    blockHTML('夜のストレッチ','stretch','STRETCH','寝る前・温まってから',[p.stretch]);
   app.querySelectorAll('.item').forEach(el=>el.addEventListener('click',()=>toggle(el.dataset.id)));
 
   const items=currentItems();
